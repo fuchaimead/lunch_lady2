@@ -1,5 +1,7 @@
 # require_relative 'wallet'
+require 'pry'
 require_relative 'person'
+
 
 class Lunchroom
   def initialize  
@@ -37,6 +39,8 @@ class Lunchroom
     running_order
   end
 
+ 
+
   def menu 
     puts "1) Place new order"
     puts "2) Edit Order"
@@ -55,9 +59,6 @@ class Lunchroom
     end 
   end 
 
-  def edit_order
-    
-  end 
 
   def running_order 
     main
@@ -67,32 +68,49 @@ class Lunchroom
   end
 
   def item_list(food)
-  food.each_with_index do |item, i| 
-    puts "#{i + 1}) #{item[:name]} $#{item[:price]}"
-  end
-end
-
-def main
-  puts "-------------"
-  puts "What main dish would you like?"
-  item_list(@main)
-    main_order = gets.strip.to_i
-    if main_order >= 1 && main_order <=5
-    main_dish = @main[main_order - 1]
-    @buyer.items << main_dish
-    puts "You ordered #{main_dish[:name]}."
-    else 
-      puts "Sorry that's not an option."
-      running_order
+    food.each_with_index do |item, i| 
+      puts "#{i + 1}) #{item[:name]} $#{item[:price]}"
     end
   end
+
+  def main
+    puts "-------------"
+    puts "What main dish would you like?"
+    item_list(@main)
+      main_order = gets.strip
+      if validate_choice(main_order)
+        number = main_order.to_i
+        if !!(@main[number - 1])
+          main_dish = @main[number - 1]
+          @buyer.items << main_dish
+          puts "You ordered #{main_dish[:name]}."
+        else 
+          puts "Sorry that's not an option."
+          running_order
+      end
+      else 
+        puts "not valid"
+        main
+      end 
+    end
 
   def sides
     puts "You get two sides. Please choose 2:"
     while @buyer.items.length < 3
-      item_list(@main)
-      user_input = gets.to_i
-      @buyer.items << @sides[user_input -1]
+      item_list(@sides)
+      user_input = gets.strip
+      if validate_choice(user_input)
+        number = user_input.to_i
+        if !!(@sides[number - 1])
+          @buyer.items << @sides[number -1]
+        else 
+          puts "Sorry that's not an option"
+          sides
+        end
+      else 
+        puts "Not valid"
+        sides
+      end 
     end
   end
 
@@ -100,24 +118,39 @@ def main
   def drinks
     puts "What drink would you like?"
     item_list(@drinks)
-    drink_order = gets.strip.to_i
-    if @drinks[drink_order]                
-    drink = @drinks[drink_order - 1]
-    @buyer.items << drink
-    puts "You ordered #{drink[:name]}."
-  else 
-    puts "Sorry that's not an option."
-    running_order
-  end
+    drink_order = gets.strip
+    if validate_choice(drink_order)
+      number = drink_order.to_i 
+      if !!(@drinks[number - 1]) 
+        drink = @drinks[number - 1]
+        @buyer.items << drink
+        puts "You ordered #{drink[:name]}."
+      else 
+        puts "Sorry that's not an option."
+        drinks
+      end
+    else 
+      puts "not valid"
+      drinks
+    end 
   end
 
   def order
     puts " ---------------"
     puts "Your final order contains: "
     @buyer.items.each do | dish | 
-      print "#{dish[:name]}, "
+      puts "#{dish[:name]} "
+      puts "=============="
     end
     total
+  end 
+
+  def validate_choice(value)
+    if /^\d+(\d+)?$/ === value
+      return true
+    else 
+      return false
+    end 
   end 
 
   def total 
@@ -137,6 +170,7 @@ def main
     end 
     menu
   end
+
 end
 
 Lunchroom.new
